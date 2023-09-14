@@ -1,15 +1,17 @@
-from scipy.optimize import linprog
+from gurobi_init import e
+from gurobipy import GRB
+import gurobipy as gp
 
-# 定义目标函数的系数向量
-c = [1, -2, 2]
+model = gp.Model(env=e, name='LP')
+x = model.addVar(lb=0, vtype=GRB.CONTINUOUS, name='x')
+y = model.addVar(lb=0, vtype=GRB.CONTINUOUS, name='y')
+z = model.addVar(lb=0, vtype=GRB.CONTINUOUS, name='z')
 
-# 定义不等式约束条件的系数矩阵和右侧常数向量
-A_ub = [[-1, 1, 0], [3, 2, 1]]
-b_ub = [1, 12]
+model.setObjective(x - 2 * y + 2 * z)
 
-# 定义变量的取值范围，默认为非负数
-x_bounds = [(0, None), (0, None), (0, None)]
+model.addConstr(-x + y <= 1)
+model.addConstr(3 * x + 2 * y + z <= 12)
 
-# 求解线性规划问题
-res = linprog(c, A_ub=A_ub, b_ub=b_ub, bounds=x_bounds)
-print(res)
+model.optimize()
+
+print(x.X, y.X, z.X)
